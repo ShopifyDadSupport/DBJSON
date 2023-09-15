@@ -2,9 +2,13 @@ const jsonServer = require('json-server');
 const server = jsonServer.create();
 const router = jsonServer.router('db.json');
 const middlewares = jsonServer.defaults();
-
 server.use(middlewares);
 server.use(jsonServer.bodyParser);
+var Datastore = require('nedb')
+  , db = new Datastore("database.db");
+db.loadDatabase(function (err) {    // Callback is optional
+  // Now commands will be executed
+});
 
 // Define a custom route to handle POST requests
 server.post('/orders', (req, res) => {
@@ -30,6 +34,20 @@ server.delete('/orders/:id', (req, res) => {
 });
 
 server.use(router);
+
+var request = require('request');
+var options = {
+  'method': 'GET',
+  'url': 'https://dbjson-fbvh.onrender.com/order',
+  'headers': {
+  }
+};
+request(options, function (error, response) {
+  if (error) throw new Error(error);
+  console.log(response.body);
+  data = JSON.parse(response.body);
+  db.insert(data);
+});
 
 server.listen(3004, () => {
   console.log('JSON Server is running');
